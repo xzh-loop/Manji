@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="keywords" content="HTML,ASP,PHP,SQL">
+<title>index</title>
+<style type="text/css">
+canvas {border:1px solid #ccc;margin:0 auto;}
+</style>
+</head>
+
+<canvas id="canvas" width="300" height="400">你的浏览器不支持Canvas</canvas>
+
+<script>
+var _keyA = _keyD = _keyW = _keyS = 0,  // 存储按键状态
+
+	step = 8,  						// 飞机移动的速率
+	w = 34, h = 44,  				// 飞机实际大小
+	planeX = 133, planeY = 356,  	// 飞机目前位置
+	planeSrc = "feiji.png",  		// 飞机素材位置
+	imgW = 177, imgH = 220,  		// 飞机源图尺寸
+
+	cw = 300, ch = 400,  // 画布大小
+	canvas = document.getElementById("canvas"),
+	ctx = canvas.getContext("2d");
+
+drawPlane();
+drawEnemy();
+
+
+var planeMoveTimer = window.setInterval(function(){
+	if(_keyA||_keyD||_keyW||_keyS){
+		ctx.clearRect(planeX, planeY, w, h);
+		_keyA && (planeX-=step);
+		_keyD && (planeX+=step);
+		_keyW && (planeY-=step);
+		_keyS && (planeY+=step);
+		planeX>=0 || (planeX=0);
+		planeX<=(cw-w) || (planeX=cw-w);
+		planeY>=0 || (planeY=0);
+		planeY<=(ch-h) || (planeY=ch-h);
+		drawPlane(planeX, planeY);
+	}
+}, 10);
+var attackEnemyTimer = window.setInterval(function(){
+	var cannonX = planeX+Math.floor(w/2);  // 炮口X轴位置
+	var cannonY = planeY;  // 炮口Y轴位置
+	var tmpTimer = window.setInterval(function(){  // 每颗炮弹的移动计时器
+		ctx.clearRect(cannonX-1, cannonY-10, 2, 10);
+		cannonY -= 20;
+		if(cannonY<0){
+			// 炮弹的贯透效果
+			ctx.beginPath();
+			ctx.moveTo(cannonX, 100);  // 100为enemy的最低位置
+			ctx.strokeStyle = "white";
+			ctx.lineWidth = "4";  // 模拟不规则毁坏，暂时尚未没实现
+			ctx.lineTo(cannonX, 0);
+			ctx.stroke();
+			ctx.closePath();
+			window.clearInterval(tmpTimer);  // 清除该炮弹的计时器
+		}
+		ctx.clearRect(cannonX-1, cannonY-10, 2, 10);
+		ctx.beginPath();
+		ctx.fillStyle="red";
+		ctx.fillRect(cannonX-1, cannonY-10, 2, 10);  // 炮弹
+		ctx.closePath();
+	}, 10);
+}, 500);
+window.document.onkeydown = function(evt){
+	evt = (evt) ? evt : window.event;
+	switch(evt.keyCode) {
+		case 65:  // A
+			_keyA = 1;
+			break;
+		case 68:  // D
+			_keyD = 1;
+			break;
+		case 87:  // W
+			_keyW = 1;
+			break;
+		case 83:  // S
+			_keyS = 1;
+			break;
+	}
+}
+window.document.onkeyup = function(evt){
+	evt = (evt) ? evt : window.event;
+	switch(evt.keyCode) {
+		case 65:  // A
+			_keyA = 0;
+			break;
+		case 68:  // D
+			_keyD = 0;
+			break;
+		case 87:  // W
+			_keyW = 0;
+			break;
+		case 83:  // S
+			_keyS = 0;
+			break;
+	}
+}
+function drawPlane(x, y) {
+	console.log(_keyA,_keyD,_keyW,_keyS);
+	var img = new Image();
+	img.src = planeSrc;  // 飞机源图地址
+	img.onload = function() {
+		ctx.drawImage(img, 0, 0, imgW, imgH, planeX, planeY, w, h);
+	}
+}
+function drawEnemy(){
+	for(var a=0;a<cw;a+=10) {
+		for(var b=0;b<ch-300;b+=10) {
+			ctx.beginPath();
+			ctx.fillStyle = "orange";
+			ctx.strokeStyle = "black";
+			ctx.strokeRect(a, b, 10 ,10);
+			ctx.fillRect(a, b, 10, 10);
+			ctx.closePath();
+		}
+	}
+}
+</script>
