@@ -1,6 +1,6 @@
 Manji
 =====
-## Hello, I'm Manji!
+## Hi, I'm Manji!
 ### Here, I want to show you something interesting!
 
 我能给你做点什么吗？
