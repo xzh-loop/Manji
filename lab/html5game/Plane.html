@@ -15,7 +15,7 @@ canvas {border:1px solid #ccc;margin:0 auto;}
 <script>
 var _keyA = _keyD = _keyW = _keyS = 0,  // 存储按键状态
 
-	step = 8,  						// 飞机移动的速率
+	step = 8,  						// 飞机移动速率
 	w = 34, h = 44,  				// 飞机实际大小
 	planeX = 133, planeY = 356,  	// 飞机目前位置
 	planeSrc = "feiji.png",  		// 飞机素材位置
@@ -47,8 +47,8 @@ var attackEnemyTimer = window.setInterval(function(){
 	var cannonX = planeX+Math.floor(w/2);  // 炮口X轴位置
 	var cannonY = planeY;  // 炮口Y轴位置
 	var tmpTimer = window.setInterval(function(){  // 每颗炮弹的移动计时器
-		ctx.clearRect(cannonX-1, cannonY-10, 2, 10);
-		cannonY -= 20;
+		ctx.clearRect(cannonX-1, cannonY-3, 2, 3);
+		cannonY -= 3;  // 炮弹步距
 		if(cannonY<0){
 			// 炮弹的贯透效果
 			ctx.beginPath();
@@ -60,12 +60,12 @@ var attackEnemyTimer = window.setInterval(function(){
 			ctx.closePath();
 			window.clearInterval(tmpTimer);  // 清除该炮弹的计时器
 		}
-		ctx.clearRect(cannonX-1, cannonY-10, 2, 10);
+		ctx.clearRect(cannonX-1, cannonY-3, 2, 3);
 		ctx.beginPath();
 		ctx.fillStyle="red";
-		ctx.fillRect(cannonX-1, cannonY-10, 2, 10);  // 炮弹
+		ctx.fillRect(cannonX-1, cannonY-3, 2, 3);  // 炮弹大小：2X3
 		ctx.closePath();
-	}, 10);
+	}, 0);
 }, 500);
 window.document.onkeydown = function(evt){
 	evt = (evt) ? evt : window.event;
@@ -102,7 +102,6 @@ window.document.onkeyup = function(evt){
 	}
 }
 function drawPlane(x, y) {
-	console.log(_keyA,_keyD,_keyW,_keyS);
 	var img = new Image();
 	img.src = planeSrc;  // 飞机源图地址
 	img.onload = function() {
