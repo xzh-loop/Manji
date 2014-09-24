@@ -1,7 +1,8 @@
 Manji
 =====
 ## Hi, I'm Manji!
-### Here, I want to show you something interesting!
+### I want to show you something interesting!
+#### [项目简介主页](http://xzh-loop.github.io/Manji/)
 
 我能给你做点什么吗？
 + 一些小demo：[目录](http://xzh-loop.github.io/Manji/lab/demo/index.html)
