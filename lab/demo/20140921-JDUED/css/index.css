@@ -1,0 +1,91 @@
+﻿@font-face {
+	font-family:yaheiconsolas;
+	src:url("fonts/yaheiconsolas.ttf");
+}
+body {margin:0;padding:0;background:#f4f4f4;font:12px/1.7 "微软雅黑";color:#3c3c3c;}
+dl, dt, dd {margin:0;padding:0;}
+#wrapper {width:1190px;margin:0 auto;}
+.clearfix:after {content:".";visibility:hidden;display:block;height:0;clear:both;}
+
+#wrapper #banner {width:100%;height:304px;overflow:hidden;position:relative;}
+#wrapper #banner ul {width:7140px;height:100%;list-style-type:none;margin:0;padding:0;position:absolute;}
+#wrapper #banner ul.w0 {left:0px;transition:left .3s ease-in-out;}
+#wrapper #banner ul.w1 {left:-1190px;transition:left .3s ease-in-out;}
+#wrapper #banner ul.w2 {left:-2380px;transition:left .3s ease-in-out;}
+#wrapper #banner ul.w3 {left:-3570px;transition:left .3s ease-in-out;}
+#wrapper #banner ul li {height:100%;float:left;}
+#wrapper #banner .flip {display:block;width:39px;height:80px;position:absolute;z-index:2;top:50%;margin-top:-40px;cursor:pointer;}
+#wrapper #banner .flip.to-left {left:10px;background:url("../images/to_left.png");}
+#wrapper #banner .flip.to-right {right:10px;background:url("../images/to_right.png");}
+#wrapper #banner .flip.ie6-to-left {left:10px;font-size:30px;text-align:center;line-height:80px;background:#444;color:#fff;filter:alpha(opacity=40);}
+#wrapper #banner .flip.ie6-to-right {right:10px;font-size:30px;text-align:center;line-height:80px;background:#444;color:#000;filter:alpha(opacity=40);}
+#wrapper #banner .toggle-btn {position:absolute;top:274px;padding-left:129px;text-align:left;text-align:center;}
+#wrapper #banner .toggle-btn span {display:block;float:left;margin-right:10px;width:10px;height:10px;_overflow:hidden;background:black;cursor:pointer;}
+#wrapper #banner .toggle-btn span.active {background:#fff;}
+
+#wrapper #intro {width:100%;height:90px;margin-top:10px;overflow:hidden;background:#fff;}
+#wrapper #intro .container {width:100%;height:59px;margin:15px 0;}
+#wrapper #intro .box {width:24%;height:100%;border-left:1px solid #ddd;float:left;box-flex:1;}
+#wrapper #intro .box.first {border-left:none;}
+#wrapper #intro .box .intro-ico {width:39px;height:39px;display:block;margin:10px 0;float:left;}
+#wrapper #intro .box .ico-1 {background:url("../images/intro_1.gif");margin-left:34px;}
+#wrapper #intro .box .ico-2 {background:url("../images/intro_2.gif");margin-left:48px;}
+#wrapper #intro .box .ico-3 {background:url("../images/intro_3.gif");margin-left:45px;}
+#wrapper #intro .box .ico-4 {background:url("../images/intro_4.gif");margin-left:41px;}
+#wrapper #intro .box dl {float:left;margin-left:14px;}
+#wrapper #intro .box dl dt {font-weight:bold;font-size:17px;}
+#wrapper #intro .box dl dd {margin:0;font-size:12px;}
+
+
+#wrapper #content {width:100%;margin-top:30px;overflow:hidden;}
+#wrapper #content .box {width:580px;background:#fff;}
+#wrapper #content .box.bl {float:left;}
+#wrapper #content .box.br {float:right;}
+#wrapper #content .box .box-left {width:190px;float:left;}
+#wrapper #content .box .box-left .guan {width:100%;height:275px;text-align:center;color:white;padding-top:35px;}
+#wrapper #content .box .box-left .guan.mz {background:#FB627F;}
+#wrapper #content .box .box-left .guan.qz {background:#E8D428;}
+#wrapper #content .box .box-left .guan h3 {font-size:29px;font-family:yaheiconsolas;font-weight:lighter;margin:0;margin-bottom:15px;}
+#wrapper #content .box .box-left .guan .pack {width:117px;border-top:1px solid #fff;border-bottom:1px solid #fff;margin:0 auto;}
+#wrapper #content .box .box-left .guan .pack span {display:block;font-size:20px;}
+#wrapper #content .box .box-left .guan .pack span.last {font-size:11px;}
+#wrapper #content .box .box-left dl {width:189px;height:98px;padding-top:17px;border-right:1px solid #e4e4e4;border-bottom:1px solid #e4e4e4;}
+#wrapper #content .box .box-left dl.last {border-bottom:none;}
+#wrapper #content .box .box-left dl dt {margin-left:24px;border-left:3px solid #565656;padding:0 5px;}
+#wrapper #content .box .box-left dl dd {margin-left:24px;margin-top:15px;height:47px;line-height:47px;}
+#wrapper #content .box .box-left dl dd .shop-ico {float:left;margin-left:3px;}
+#wrapper #content .box .box-left dl dd span {float:left;margin-left:12px;}
+#wrapper #content .box .box-right {width:390px;float:right;}
+#wrapper #content .box .box-right .header {height:29px;border-bottom:1px solid #e4e4e4;padding-top:10px;}
+#wrapper #content .box .box-right .header span {font-size:14px;display:block;border-left:3px solid #565656;margin-left:10px;padding-left:4px;}
+#wrapper #content .box .box-right .show-box {width:100%;}
+#wrapper #content .box .box-right .show-box .goods {width:160px;height:204px;display:inline-block;*display:inline;*zoom:1;margin-left:23px;margin-top:23px;}
+#wrapper #content .box .box-right .show-box .goods .photo {width:100%;position:relative;}
+#wrapper #content .box .box-right .show-box .goods .photo span {position:absolute;bottom:0;right:0;display:none;width:84px;height:37px;background:rgba(255,255,255,0.6);*background:#fff;*filter:alpha(opacity=40);color:black;text-align:center;line-height:37px;}
+
+@media screen and (max-width:990px){
+	#wrapper {width:990px;}
+	
+	#wrapper #banner {height:253px;}
+	#wrapper #banner ul {width:3960px;}
+	#wrapper #banner ul.w0 {left:0px;}
+	#wrapper #banner ul.w1 {left:-990px;}
+	#wrapper #banner ul.w2 {left:-1980px;}
+	#wrapper #banner ul.w3 {left:-2970px;}
+	#wrapper #banner ul li img {width:990px;height:100%;}
+	#wrapper #banner .toggle-btn {top:228px;padding-left:107px;}
+
+	#wrapper #intro .box .ico-1 {margin-left:5px;}
+	#wrapper #intro .box .ico-2 {margin-left:5px;}
+	#wrapper #intro .box .ico-3 {margin-left:5px;}
+	#wrapper #intro .box .ico-4 {margin-left:5px;}
+	#wrapper #intro .box dl {margin-left:10px;}
+	#wrapper #intro .box dl dt {font-size:14px;}
+	#wrapper #intro .box dl dd {font-size:10px;}
+	
+	#wrapper #content .box {width:990px;}
+	#wrapper #content .box.bl {float:left;margin-top:10px;}
+	#wrapper #content .box.br {float:left;margin-top:10px;}
+	#wrapper #content .box .box-right {width:800px;}
+	#wrapper #content .box .box-right .show-box .goods {margin-left:32px;}
+}
