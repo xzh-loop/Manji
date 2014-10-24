@@ -1,7 +1,4 @@
-﻿@font-face {
-	font-family:yaheiconsolas;
-	src:url("fonts/yaheiconsolas.ttf");
-}
+﻿@font-face {}
 body {margin:0;padding:0;background:#f4f4f4;font:12px/1.7 "微软雅黑";color:#3c3c3c;}
 dl, dt, dd {margin:0;padding:0;}
 #wrapper {width:1190px;margin:0 auto;}
