@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<title>sidebarMenu</title>
+</head>
+
+<ul id="menuid">
+    <li><a href="#">1</a></li>
+    <li>
+        <a href="#">2</a>
+        <ul>
+            <li><a href="#">Sub 2.1</a></li>
+            <li><a href="#">Sub 2.2</a></li>
+        </ul>
+    </li>
+    <li>
+        <a href="#">3</a>
+        <ul>
+            <li><a href="#">Sub 3.1</a></li>
+            <li>
+                <a href="#">Sub 3.2</a>
+                <ul>
+                    <li><a href="#">Sub 3.2.1</a></li>
+                    <li><a href="#">Sub 3.2.2</a></li>
+                    <li><a href="#">Sub 3.2.3</a></li>
+                    <li><a href="#">Sub 3.2.4</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<style type="text/css">
+    ul {margin:0;padding:0;width:180px;list-style-type:none;}
+    /* 要先设置为visibility:hidden（这时<ul>才有宽度，子<ul>才能计算左距），最后用JS处理它 */
+    ul ul {position:absolute;width:170px;top:0;visibility:hidden;}
+    li {position:relative;border-bottom:1px solid black;}
+    a {_height:1%;display:block;padding:6px;color:white;background:gray;text-decoration:none;}
+    a:hover {background:black;}
+</style>
+<script type="text/javascript">
+    initialMenu();
+    function initialMenu() {
+        var menuid = document.getElementById("menuid");
+        // 主<ul>下的所有<ul>，包括二级和三级的
+        var ultags = menuid.getElementsByTagName("ul");
+        for(var t=0,len=ultags.length;t<len;t++) {
+            // <ul>同胞<a>添加类,即hover该<a>会显示该<ul>
+            ultags[t].parentNode.getElementsByTagName("a")[0].className += "subfolderstyle";
+            if(ultags[t].parentNode.parentNode===menuid) {
+                // 如果该<ul>是第一层Submenu,左距等于主Mainmenu宽
+                ultags[t].style.left = ultags[t].parentNode.offsetWidth+'px';
+            } else {
+                // 如不是第一层Submenu，则父<ul>下的第一个<a>的宽度，也就是上一级Submenu的宽度
+                ultags[t].style.left = ultags[t-1].getElementsByTagName("a")[0].offsetWidth+'px';
+            }
+            // parentNode是该<ul>上层的<li>
+            ultags[t].parentNode.onmouseenter = function() {
+                this.getElementsByTagName("ul")[0].style.display = "block";
+            }
+            ultags[t].parentNode.onmouseleave = function() {
+                this.getElementsByTagName("ul")[0].style.display = "none";
+            }
+        }
+        // 呼应CSS中的注释，计算完各个<ul>的left后就可以不占文档位置了
+        for (var t=ultags.length-1; t>-1; t--){
+            ultags[t].style.visibility="visible";
+            ultags[t].style.display="none";
+        }
+    }
+</script>
