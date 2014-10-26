@@ -1,0 +1,28 @@
+﻿/* author manji ( xiaozhen ) */
+
+.clearfix:after {visibility:hidden;display:block;content:".";height:0;clear:both;overflow:hidden;}
+
+#timer-wrapper {width:319px;border:1px solid #979797;border-radius:4px;font-family:"微软雅黑";}
+#timer-wrapper .header {padding:0 16px;height:40px;}
+#timer-wrapper .header #bot-content {float:left;height:40px;}
+#timer-wrapper .header #bot-content span {margin:13px 7px 0 0;width:12px;height:12px;display:block;float:left;background:url('test.gif') no-repeat -118px 0;}
+#timer-wrapper .header #bot-content span.active {background-position:-118px -13px;}
+#timer-wrapper .header .timer-name {float:right;font-weight:bold;font-size:12px;line-height:40px;color:#7e97ab;}
+
+#timer-wrapper .content {padding:19px 16px;height:48px;border-top:1px solid #dedede;border-bottom:1px solid #dedede;}
+#timer-wrapper .content .button-field {float:left;width:117px;height:40px;background:url('test.gif');padding-top:6px;}
+#start, #stop, #restart {width:33px;height:34px;margin-left:4px;*display:inline;float:left;}
+#start {background:url('test.gif') no-repeat 0 -47px;}
+#stop {background:url('test.gif') no-repeat -37px -47px;}
+#restart {background:url('test.gif') no-repeat -74px -47px;}
+#start.active {background-position:0 -82px}
+#stop.active {background-position:-37px -82px}
+#restart.active {background-position:-74px -82px}
+#timer-wrapper .content .counter-field {float:right;text-align:right;}
+#timer-wrapper .content .counter-field #count {line-height:34px;height:34px;font-size:24px;color:#666;letter-spacing:3px;}
+#timer-wrapper .content .counter-field .sep {line-height:15px;height:15px;font-size:12px;color:#999;}
+#timer-wrapper .content .counter-field .sep span {margin-right:9px;letter-spacing:0px;}
+
+#timer-wrapper .footer {margin-top:1px;background:#eee;height:41px;padding:0 16px;font-size:14px;font-weight:bold;color:#999;}
+#timer-wrapper .footer .tt {float:left;line-height:41px;}
+#timer-wrapper .footer #ttn {float:right;line-height:41px;}
