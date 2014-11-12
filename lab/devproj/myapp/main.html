@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<title>半音阶转调器-v0.0.1.141112_beta - 小振xzh</title>
+</head>
+
+<style type="text/css">
+body {margin:0;padding:0;}
+#wrapper {margin:0 auto;text-align:center;min-width:320px;}
+#btn-field {margin:10px auto;}
+#from, #to {height:30px;width:50px;outline:none;}
+#from:hover, #to:hover {border-color:orange;background:#fffffe;}
+#turn {transition:all .3s ease-in-out;border:1px solid black;background:#3F9BCA;width:80px;height:30px;color:white;font-weight:bold;outline:none;}
+#turn:hover {transition:all .3s ease-in-out;color:black;background:white;}
+#origin, #result {display:block;width:96%;height:300px;resize:none;margin:0 auto;outline:none;box-shadow:0px 0px 2px 3px #ccc inset;padding:5px;}
+</style>
+
+<div id="wrapper">
+    <textarea id="origin" placeholder="作者：JE吧-小振xzh   请在这里粘贴您的数字谱   请小心与谱正文无关的内容被转换哦^_^   （目前只支持各调转C调）"></textarea>
+    <div id="btn-field">
+        Author: 小振xzh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <select id="from">
+            <option value="C">C</option>
+            <option value="bD/#C">bD/#C</option>
+            <option value="D">D</option>
+            <option value="bE">bE</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="bG/#F">bG/#F</option>
+            <option value="G">G</option>
+            <option value="bA">bA</option>
+            <option value="A">A</option>
+            <option value="bB">bB</option>
+            <option value="B/bC">B/bC</option>
+        </select>
+        <button id="turn">转换！</button>
+        <select id="to">
+            <option value="C">C</option>
+        </select>
+    </div>
+    <textarea id="result"></textarea>
+</div>
+
+<script>
+var data = {
+    'C': ['1','2','3','4','5','6','7'],
+    'bD/#C': ['#1','#2','#3','#4','#5','#6','#7'],  //#3/4, #7/[1]
+    'D': ['2','3','#4','5','6','7','[#1]'],
+    'bE': ['#2','#3','5','#5','#6','#7','[2]'],    //#D, #3/4, #7/[1]
+    'E': ['3','#4','#5','6','7','[#1]','[#2]'],
+    'F': ['4','5','6','#6','[1]','[2]','[3]'],
+    'bG/#F': ['#4','#5','#6','7','[#1]','[#2]','[#3]'],   //[#3]/[4]
+    'G': ['(5)','(6)','(7)','1','2','3','#4'],
+    'bA': ['(#5)','(#6)','(#7)','#1','#2','#3','5'],   //#G, (#7)/1, #3/4
+    'A': ['(6)','(7)','#1','2','3','#4','#5'],
+    'bB': ['(#6)','(#7)','2','#2','#3','5','6'],   //#A, (#7)/1, #3/4
+    'B/bC': ['(7)','#1','#2','3','#4','#5','#6']
+};
+var v, f, t, i, j, len, tmp,
+    riseFlag = 0,
+    lowFlag = 0,
+    highFlag = 0,
+    re = '',
+    origin = document.getElementById('origin'),
+    result = document.getElementById('result'),
+    from = document.getElementById('from'),
+    to = document.getElementById('to'),
+    turn = document.getElementById('turn');
+turn.onclick = function() {
+    v = origin.value;
+    f = from.value;
+    t = to.value;
+    re = '';
+    if(f==t) { result.value = v; return; }
+    v = v.split('');
+    for(i=0,len=v.length;i<len;i++) {
+        tmp = v[i];
+        // if(tmp===' ') { re+=' '; continue;}
+        if(tmp==='#') { riseFlag = 1; continue; }
+        if(tmp==='(') { lowFlag += 1; continue; }
+        if(tmp===')') { lowFlag -= 1; continue; }
+        if(tmp==='[') { highFlag += 1; continue; }
+        if(tmp===']') { highFlag -= 1; continue; }
+
+        if(/\d+/.test(tmp)) {
+            if(tmp==0 || tmp>7) {re += tmp; continue;}
+            tmp = data[f][tmp-1];
+            tmp = handleNumber(tmp, riseFlag, lowFlag, highFlag);
+
+            riseFlag = 0;
+            re += tmp;
+            continue;
+        }
+        re += tmp;
+        result.value += tmp;
+    }
+    // re = re.replace(/(?=\])\s/g,'');
+    result.value = re;
+}
+
+function handleNumber(tmp, riseFlag, lowFlag, highFlag) {
+    var i,
+        index = tmp.search(/\d/),
+        num = tmp.charAt(index);
+    for(i=0;i<index;i++) {
+        switch(tmp.charAt(i)) {
+            case '#':
+                if(riseFlag) {
+                    num = parseInt(num)+1;
+                    if(num==8) {
+                        num = 1;
+                        highFlag += 1;
+                    }
+                } else {
+                    num = '#'+num;
+                }
+                break;
+            case '(': lowFlag+=1; break;
+            case '[': highFlag+=1; break;
+        }
+    }
+    if(lowFlag>highFlag) {
+        for(i=0;i<lowFlag-highFlag;i++) {
+            num = '('+num+')';
+        }
+    } else {
+        for(i=0;i<highFlag-lowFlag;i++) {
+            num = '['+num+']';
+        }
+    }
+    return num;
+}
+</script>

@@ -1,0 +1,16 @@
+{
+  "name": "nw-demo",
+  "main": "main.html",
+
+  "description": "my first demo app",
+  "version": "0.1.0",
+  "keywords": ["demo", "node-webkit"],
+  "window": {  				/*APP窗口属性*/
+  	"icon": "logo.jpg",  	/*APP图标*/
+  	"toolbar": false,  		/*是否显示工具栏*/
+  	"width": 400,  			/*窗口初始化大小*/
+  	"height": 530,
+  	"frame": true			/*是否显示外窗体，如最大化最小化、关闭按钮*/
+  },
+  "user-agent": "%name %ver %nwver %webkit_ver %osinfo"  /*可自定义APP的UA*/
+}
