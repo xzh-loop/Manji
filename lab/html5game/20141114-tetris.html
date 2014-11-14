@@ -258,7 +258,7 @@ Thunder.prototype.constructor = Thunder;
 Line.prototype = new Brick();
 Line.prototype.constructor = Line;
 
-window.document.onkeypress = function(evt) {    //事件处理是否也应该放进对象里？
+window.document.onkeydown = function(evt) {    //事件处理是否也应该放进对象里？
     evt = (evt) ? evt : window.event;
     // console.log(evt.keyCode)
     switch(evt.keyCode){
