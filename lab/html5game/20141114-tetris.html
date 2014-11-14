@@ -37,9 +37,11 @@ Space：变换方向<br>
 var i, j, tmp,
     score = 0,
     eachScore = 1,  //每块砖头值多少分
-    winScore = 20*50, //胜利所需分数
-    speed = 800,    //ms, the more little the more fast
+    winScore = 20*2, //胜利所需分数
+    speed = 800,    //初始速度ms, the more little the more fast
     qia = 1,    //关卡
+    qiaSpeed = 50, //每个关卡提升的速度
+    qiaScore = winScore,   //每个关卡增加多少胜利分数（注意score每关会累积）
     nBrick = Math.floor(Math.random()*5), //下一个砖头的形状
     nIsOverturn = Math.floor(Math.random()*2),
     nDirection = Math.floor(Math.random()*4),
@@ -49,27 +51,6 @@ var i, j, tmp,
     ctx = canvas.getContext('2d'),
     brickWidth = 20,    //砖块大小
     width = 400, height = 500;  //画布宽高，20X25
-
-// 初始化BOARD，注意纵向有26个，最后一排用来判断是否触底
-for(i=0;i<20;i++){
-    BOARD[i] = [];
-    for(j=0;j<26;j++) {
-        if(j==25) {
-            BOARD[i][j] = 1
-        } else {
-            BOARD[i][j] = 0;
-        }
-    }
-}
-
-// 初始界面的一些内容，如主界面与信息界面的分割线、分数、关卡
-ctx.moveTo(401,0);
-ctx.strokeStyle = 'red';
-ctx.lineWidth = '1';
-ctx.lineTo(401,500);
-ctx.stroke();
-ctx.fillText('分数：'+score,410,30);
-ctx.fillText('关卡：'+qia,410,50);
 
 ctx.strokeStyle = 'black';  //砖块边框颜色
 
@@ -138,6 +119,7 @@ Brick.prototype.move = function(moveX, moveY) {
             score += 20*eachScore;  //加分
             ctx.fillText('分数：'+score,410,30);
             ctx.fillText('关卡：'+qia,410,50);
+            ctx.fillText('胜利需：'+winScore,410,70);
             ctx.restore();
 
             for(j=k;j>0;j--) {
@@ -164,6 +146,7 @@ Brick.prototype.move = function(moveX, moveY) {
         }
         while(score>=winScore) {
             alert('You win!!!');
+            init();
             return;
         }
 
@@ -258,6 +241,43 @@ Thunder.prototype.constructor = Thunder;
 Line.prototype = new Brick();
 Line.prototype.constructor = Line;
 
+//--------------------------------------
+init(1);
+function init(isFirstInit) {
+    if(!isFirstInit) {
+        speed -= qia*qiaSpeed;
+        qia += 1;
+        winScore += qiaScore;
+    }
+    ctx.clearRect(0,0,500,500);
+    // 初始化BOARD，注意纵向有26个，最后一排用来判断是否触底
+    for(i=0;i<20;i++){
+        BOARD[i] = [];
+        for(j=0;j<26;j++) {
+            if(j==25) {
+                BOARD[i][j] = 1
+            } else {
+                BOARD[i][j] = 0;
+            }
+        }
+    }
+
+    // 初始界面的一些内容，如主界面与信息界面的分割线、分数、关卡
+    ctx.save();
+    ctx.moveTo(401,0);
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = '1';
+    ctx.lineTo(401,500);
+    ctx.stroke();
+    ctx.fillStyle = 'black';
+    ctx.fillText('分数：'+score,410,30);
+    ctx.fillText('关卡：'+qia,410,50);
+    ctx.fillText('胜利需：'+winScore,410,70);
+    ctx.restore();
+
+    NextBrick();
+}
+
 window.document.onkeydown = function(evt) {    //事件处理是否也应该放进对象里？
     evt = (evt) ? evt : window.event;
     // console.log(evt.keyCode)
@@ -272,7 +292,6 @@ window.document.onkeydown = function(evt) {    //事件处理是否也应该放�
     }
 }
 
-NextBrick();
 function NextBrick() {
     b = new window[SHAPE[nBrick]]();
     b.direction = nDirection;
