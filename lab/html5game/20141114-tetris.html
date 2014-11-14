@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<title>Tetris</title>
+</head>
+<canvas id="canvas" width="502" height="500" style="border:1px solid black"></canvas>
+<script>
+/*
+苦逼怎么解决旋转，只能用数组了？
+如何判断已经接底了？新增BOAR数组的第26行(index=25)。
+砖块贴近右边时，变换方向时，砖块会溢出右边，怎么办，特殊处理？
+    稍微改进，方向0/2时均为占宽较小时的情形，利于判断
+    只判断改变方向之后的位置是否被占用的局限是，一些卡位的情况没考虑进
+一触底就出现下一个了，前一个无法移动，影响用户体验，怎么办？
+    解决了，原来左右移动也共享了对下方砖块状态的判断，加个&&MoveX==0限制横向移动触发该判断
+接下来就剩消除和失败/胜利判断了！——MoveOn~
+    消除时如何将整体下移？成功消除时会心一笑，哈哈哈~
+    分数制，达到一定分数时胜利！
+    失败很好判断，判断originY即可。
+        事实上没这么简单，因为如果是两侧到堆到顶，但中间是空的，这时不应该判输，对吧？
+其他修饰或改进的：shape的颜色，右方显示分数、关卡
+    哈哈，一不小心弄成闪闪发光的砖块了！
+    虽然已实现显示分数，但是文字的位置高度有点难以把握、
+    现在如何画出下一个形状的提示成了棘手的问题。
+        又不能新建对象，难道要把各个形状的布局数组提出来？
+            刚想提出来，大工程，突然发现如果给每个构造函数添加一个isModel参数，即可选择性触发autoMove
+                但有个问题，该对象如何释放，似乎delete不太有用？
+                    新建了个deleteObj函数。
+还有一些问题，多少分一局才算合理？
+*/
+var i, j, tmp,
+    score = 0,
+    eachScore = 1,  //每块砖头值多少分
+    winScore = 20*2, //胜利所需分数
+    speed = 800,    //ms, the more little the more fast
+    qia = 1,    //关卡
+    nBrick = Math.floor(Math.random()*5), //下一个砖头的形状
+    nIsOverturn = Math.floor(Math.random()*2),
+    nDirection = Math.floor(Math.random()*4),
+    BOARD = [],
+    SHAPE = ['Tian','Chu','Tu','Thunder','Line'],
+    canvas = document.getElementById('canvas'),
+    ctx = canvas.getContext('2d'),
+    brickWidth = 20,    //砖块大小
+    width = 400, height = 500;  //画布宽高，20X25
+
+// 初始化BOARD，注意纵向有26个，最后一排用来判断是否触底
+for(i=0;i<20;i++){
+    BOARD[i] = [];
+    for(j=0;j<26;j++) {
+        if(j==25) {
+            BOARD[i][j] = 1
+        } else {
+            BOARD[i][j] = 0;
+        }
+    }
+}
+
+// 初始界面的一些内容，如主界面与信息界面的分割线、分数、关卡
+ctx.moveTo(401,0);
+ctx.strokeStyle = 'red';
+ctx.lineWidth = '1';
+ctx.lineTo(401,500);
+ctx.stroke();
+ctx.fillText('分数：'+score,410,30);
+ctx.fillText('关卡：'+qia,410,50);
+
+ctx.strokeStyle = 'black';  //砖块边框颜色
+
+// 主界面网格显示，@dev
+// for(i=0;i<20;i++) {
+//     for(j=0;j<25;j++) {
+//         ctx.strokeRect(brickWidth*i, brickWidth*j, brickWidth, brickWidth);   //注意+1和减2
+//     }
+// }
+
+function Brick() { }
+Brick.prototype.embattle = null;    //砖块的布局（需重载）
+Brick.prototype.isOverturn = 0; //是否翻转
+Brick.prototype.originX = 9;    //砖头的绘制起点X
+Brick.prototype.originY = -3;    //砖头的绘制起点Y
+Brick.prototype.direction = 0;  //砖头朝向
+Brick.prototype.autoMoveTimer = null;   //自动移动计时器
+Brick.prototype.draw = function() {
+    ctx.fillStyle = 'rgb('+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
+    for(i=0;i<4;i++) {
+        tmp = this.embattle[this.isOverturn][this.direction][i];
+        ctx.fillRect((this.originX+tmp%4)*brickWidth, (this.originY+Math.floor(tmp/4))*brickWidth, brickWidth, brickWidth);
+        ctx.strokeRect((this.originX+tmp%4)*brickWidth+1, (this.originY+Math.floor(tmp/4))*brickWidth+1, brickWidth-2, brickWidth-2);   //注意+1和减2
+    }
+}
+Brick.prototype.move = function(moveX, moveY) {
+    //---终止判定---
+    tmp = this.embattle[this.isOverturn][this.direction];
+    var as = BOARD[this.originX+tmp[0]%4][this.originY+Math.floor(tmp[0]/4)+1],
+        bs = BOARD[this.originX+tmp[1]%4][this.originY+Math.floor(tmp[1]/4)+1],
+        cs = BOARD[this.originX+tmp[2]%4][this.originY+Math.floor(tmp[2]/4)+1],
+        ds = BOARD[this.originX+tmp[3]%4][this.originY+Math.floor(tmp[3]/4)+1];
+    // 横向移动违规
+    if((this.originX==0 && moveX==-1) 
+        || (this.originX+tmp[0]%4==19 && moveX==1)
+        || (this.originX+tmp[1]%4==19 && moveX==1)
+        || (this.originX+tmp[2]%4==19 && moveX==1)
+        || (this.originX+tmp[3]%4==19 && moveX==1)
+        || (BOARD[this.originX+tmp[0]%4+moveX][this.originY+Math.floor(tmp[0]/4)]==1)
+        || (BOARD[this.originX+tmp[1]%4+moveX][this.originY+Math.floor(tmp[1]/4)]==1)
+        || (BOARD[this.originX+tmp[2]%4+moveX][this.originY+Math.floor(tmp[2]/4)]==1)
+        || (BOARD[this.originX+tmp[3]%4+moveX][this.originY+Math.floor(tmp[3]/4)]==1)) {
+            return;
+    }
+    // 纵向终止
+    if((as==1 || bs==1 || cs==1 || ds==1) && moveX==0) {
+        clearInterval(this.autoMoveTimer);
+        this.autoMoveTimer = null;
+        BOARD[this.originX+tmp[0]%4][this.originY+Math.floor(tmp[0]/4)] = 1;
+        BOARD[this.originX+tmp[1]%4][this.originY+Math.floor(tmp[1]/4)] = 1;
+        BOARD[this.originX+tmp[2]%4][this.originY+Math.floor(tmp[2]/4)] = 1;
+        BOARD[this.originX+tmp[3]%4][this.originY+Math.floor(tmp[3]/4)] = 1;
+        
+        // 全民爱消除~
+        ALabel:for(i=0;i<4;i++) {
+            var k = this.originY+Math.floor(tmp[i]/4);
+            for(j=0;j<20;j++) {
+                if(BOARD[j][k] == 0) {
+                    continue ALabel;
+                }
+            }
+
+            ctx.clearRect(410,0,100,100);
+            ctx.save();
+            ctx.fillStyle = 'black';
+            score += 20*eachScore;  //加分
+            ctx.fillText('分数：'+score,410,30);
+            ctx.fillText('关卡：'+qia,410,50);
+            ctx.restore();
+
+            for(j=k;j>0;j--) {
+                for(var p=0;p<20;p++) {
+                    BOARD[p][j] = BOARD[p][j-1];
+                }
+            }
+            for(j=0;j<20;BOARD[j][0]=0,j++);    //初始化第一行
+            for(var p=0;p<20;p++) {
+                for(j=0;j<=k;j++) {
+                    if(BOARD[p][j]==0) {
+                        ctx.clearRect(p*brickWidth, j*brickWidth, brickWidth, brickWidth);
+                    } else {
+                        ctx.fillRect(p*brickWidth, j*brickWidth, brickWidth, brickWidth);
+                        ctx.strokeRect(p*brickWidth+1, j*brickWidth+1, brickWidth-2, brickWidth-2);
+                    }
+                }
+            } 
+        }
+
+        if(this.originY<0) {
+            alert("You fail!!!");
+            return;
+        }
+        while(score>=winScore) {
+            alert('You win!!!');
+            return;
+        }
+
+        deleteObj(b);   //为什么无法删除该对象？
+        NextBrick();    //出现下一个
+        return;
+    }
+
+    for(i=0;i<4;i++) {
+        tmp = this.embattle[this.isOverturn][this.direction][i];
+        ctx.clearRect((this.originX+tmp%4)*brickWidth, (this.originY+Math.floor(tmp/4))*brickWidth, brickWidth, brickWidth);
+    }
+    this.originX += moveX;
+    this.originY += moveY;
+    this.draw();
+}
+Brick.prototype.autoMove = function() {
+    var status, self = this;
+    this.autoMoveTimer = setInterval(function() {
+        status = self.move(0,1);
+    },speed);
+}
+Brick.prototype.change = function() {
+    var ox = this.originX, oy = this.originY,
+        originDirection = this.direction;
+    this.direction = (this.direction+1)%4,
+    tmp = this.embattle[this.isOverturn][this.direction];
+    // 变换方向之后如果有部分溢出了右边界，将整体左移
+    while(ox+tmp[0]%4 > 19 || ox+tmp[1]%4 > 19 || ox+tmp[2]%4 > 19 || ox+tmp[3]%4 > 19) {
+        ox -= 1;
+    }
+    if(BOARD[ox+tmp[0]%4][oy+Math.floor(tmp[0]/4)] == 0
+        && BOARD[ox+tmp[1]%4][oy+Math.floor(tmp[1]/4)] == 0
+        && BOARD[ox+tmp[2]%4][oy+Math.floor(tmp[2]/4)] ==0
+        && BOARD[ox+tmp[3]%4][oy+Math.floor(tmp[3]/4)] ==0) {
+            // 清除原位置
+            for(i=0;i<4;i++) {
+                tmp = this.embattle[this.isOverturn][originDirection][i];
+                ctx.clearRect((this.originX+tmp%4)*brickWidth, (this.originY+Math.floor(tmp/4))*brickWidth, brickWidth, brickWidth);
+            }
+            this.originX = ox;
+            this.originY = oy;
+            this.draw();
+    } else {
+        this.direction = originDirection;   //还原方向
+    }
+}
+function Tian(isModel) {
+    this.embattle = [
+        [ [0,1,4,5], [0,1,4,5], [0,1,4,5], [0,1,4,5] ], //布局表为4X4表格，数字为砖头位置
+        [ [0,1,4,5], [0,1,4,5], [0,1,4,5], [0,1,4,5] ]   //布局表为4X4表格，数字为砖头位置
+    ];
+    isModel || this.autoMove();
+}
+function Chu(isModel) {
+    this.embattle = [
+        [ [0,1,4,8], [0,4,5,6], [1,5,8,9], [0,1,2,6] ] ,  //布局表为4X4表格，数字为砖头位置
+        [ [0,1,5,9], [0,1,2,4], [0,4,8,9], [2,4,5,6] ]   //次行为翻转的情况
+    ];
+    isModel || this.autoMove();
+}
+function Tu(isModel) {
+    this.embattle = [
+        [ [0,4,5,8], [1,4,5,6], [1,4,5,9], [0,1,2,5] ],  //布局表为4X4表格，数字为砖头位置
+        [ [0,4,5,8], [1,4,5,6], [1,4,5,9], [0,1,2,5] ]   //次行为翻转的情况
+    ];
+    isModel || this.autoMove();
+}
+function Thunder(isModel) {
+    this.embattle = [
+        [ [0,4,5,9], [1,2,4,5], [0,4,5,9], [1,2,4,5] ],  //布局表为4X4表格，数字为砖头位置
+        [ [1,4,5,8], [0,1,5,6], [1,4,5,8], [0,1,5,6] ]   //次行为翻转的情况
+    ];
+    isModel || this.autoMove();
+}
+function Line(isModel) {
+    this.embattle = [
+        [ [0,4,8,12], [0,1,2,3], [0,4,8,12], [0,1,2,3] ],  //布局表为4X4表格，数字为砖头位置
+        [ [0,4,8,12], [0,1,2,3], [0,4,8,12], [0,1,2,3] ]   //布局表为4X4表格，数字为砖头位置
+    ];
+    isModel || this.autoMove();
+}
+// 继承父类
+Tian.prototype = new Brick();
+Tian.prototype.constructor = Tian;
+Chu.prototype = new Brick();
+Chu.prototype.constructor = Chu;
+Tu.prototype = new Brick();
+Tu.prototype.constructor = Tu;
+Thunder.prototype = new Brick();
+Thunder.prototype.constructor = Thunder;
+Line.prototype = new Brick();
+Line.prototype.constructor = Line;
+
+window.document.onkeypress = function(evt) {    //事件处理是否也应该放进对象里？
+    evt = (evt) ? evt : window.event;
+    // console.log(evt.keyCode)
+    switch(evt.keyCode){
+        case 65: b.move(-1,0); break;   //还区分大小写？
+        case 97: b.move(-1,0); break;
+        case 68: b.move(1,0); break;
+        case 100: b.move(1,0); break;
+        case 83: b.move(0,1); break;
+        case 115: b.move(0,1); break;
+        case 32: b.change(); break;
+    }
+}
+
+NextBrick();
+function NextBrick() {
+    b = new window[SHAPE[nBrick]]();
+    b.direction = nDirection;
+    b.isOverturn = nIsOverturn;
+
+    nBrick = Math.floor(Math.random()*5);   //下一个的形状
+    nDirection = Math.floor(Math.random()*4);   //下一个的方向
+    nIsOverturn = Math.floor(Math.random()*2);  //下一个的翻转
+
+    ctx.clearRect(410,100,100,100);
+    ctx.strokeRect(410,100,80,80);
+    var show = new window[SHAPE[nBrick]](1);
+    var em = show.embattle[nIsOverturn][nDirection];
+    for(var u=0;u<4;u++) {
+        ctx.fillRect(410+em[u]%4*10,100+Math.floor(em[u]/4)*10,10,10);
+        ctx.strokeRect(410+em[u]%4*10+1,100+Math.floor(em[u]/4)*10+1,10-2,10-2)
+    }
+    // deleteObj(this, show);   //这里无须手动回收
+}
+
+// 这里提供彻底清除对象的方法
+function deleteObj(obj) {
+    // console.log(obj);
+    if(typeof(obj)==='object') {
+        for(var e in obj) {
+            // console.log(e);
+            if(typeof(e)==='object' && obj.hasOwnProperty(e)) {
+                deleteObj(obj[e]);
+            } else {
+                // console.log(Object.getOwnPropertyDescriptor(obj, e));
+                delete obj[e];
+            }
+        }
+    }
+    delete obj;
+    // console.log(obj);
+}
+</script>
